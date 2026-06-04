@@ -1,0 +1,261 @@
+# 1 position
+
+class Position:
+   def __init__(self, column, row):
+       #enregistre la colonne ('a' à 'h') et la ligne (1 à 8)
+       self._column = column
+       self._row = row
+
+   @property
+   def column(self):
+       return self._column
+
+   @property
+   def row(self):
+       return self._row
+
+   def __str__(self):
+       # affiche position
+       return str(self._column) + str(self._row)
+
+#2 piece
+class Piece:
+   def __init__(self, position, color):
+       self._position = position
+       self._color = color  #0=Blanc,1=Noir
+
+   @property
+   def position(self):
+       return self._position
+
+   @position.setter
+   def position(self, new_position):
+       self._position = new_position
+
+   @property
+   def color(self):
+       return self._color
+
+   def isValidMove(self, newPosition, board):
+       # accepte coup globale
+       return True
+
+   def __str__(self):
+       return "?"
+
+#3 role pieces
+class Pawn(Piece):
+   def __str__(self):
+       return "P" if self.color == 0 else "p"
+
+
+class Rook(Piece):
+   def __str__(self):
+       return "R" if self.color == 0 else "r"
+
+
+class Knight(Piece):
+   def __str__(self):
+       return "N" if self.color == 0 else "n"
+
+
+class Bishop(Piece):
+   def __str__(self):
+       return "B" if self.color == 0 else "b"
+
+
+class Queen(Piece):
+   def __str__(self):
+       return "Q" if self.color == 0 else "q"
+
+
+class King(Piece):
+   def __str__(self):
+       return "K" if self.color == 0 else "k"
+
+#4 board
+class Board:
+   def __init__(self):
+       #liste pieces
+       self._pieces = []
+       #placement départ pieces
+       self.remplir_plateau()
+
+   def remplir_plateau(self):
+       #pieces blanche
+       #pions ligne 2
+       for col in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+           self._pieces.append(Pawn(Position(col, 2), 0))
+       #pieces special ligne 1
+       self._pieces.append(Rook(Position('a', 1), 0))
+       self._pieces.append(Knight(Position('b', 1), 0))
+       self._pieces.append(Bishop(Position('c', 1), 0))
+       self._pieces.append(Queen(Position('d', 1), 0))
+       self._pieces.append(King(Position('e', 1), 0))
+       self._pieces.append(Bishop(Position('f', 1), 0))
+       self._pieces.append(Knight(Position('g', 1), 0))
+       self._pieces.append(Rook(Position('h', 1), 0))
+
+       #pieces noir
+       #pions ligne 2
+       for col in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+           self._pieces.append(Pawn(Position(col, 7), 1))
+       #pieces special ligne 1
+       self._pieces.append(Rook(Position('a', 8), 1))
+       self._pieces.append(Knight(Position('b', 8), 1))
+       self._pieces.append(Bishop(Position('c', 8), 1))
+       self._pieces.append(Queen(Position('d', 8), 1))
+       self._pieces.append(King(Position('e', 8), 1))
+       self._pieces.append(Bishop(Position('f', 8), 1))
+       self._pieces.append(Knight(Position('g', 8), 1))
+       self._pieces.append(Rook(Position('h', 8), 1))
+
+   def getPosition(self, piece):
+       if piece in self._pieces:
+           return piece.position
+       return None
+
+   def getPiece(self, position):
+       #cherche pieces par position
+       for p in self._pieces:
+           if p.position.column == position.column and p.position.row == position.row:
+               return p
+       return None
+
+   def enleverPiece(self, piece):
+       #capture pieces
+       if piece in self._pieces:
+           self._pieces.remove(piece)
+
+#5 joueur
+class Player:
+   def __init__(self, name, color):
+       self._name = name
+       self._color = color  #0=Blanc,1=Noir
+
+   @property
+   def name(self):
+       return self._name
+
+   @property
+   def color(self):
+       return self._color
+
+   def askMove(self):
+       coup = input(f"Joueur {self._name}, entrez votre coup (ex: e2e4) : ")
+       return coup
+
+#6 chess
+class Chess:
+   def __init__(self):
+       self._board = Board()
+       self._players = []
+       self._currentPlayer = None
+
+   def initPlayer(self):
+       print("Bon jeu d'échec")
+       nom1 = input("Nom du joueur Blanc : ")
+       nom2 = input("Nom du joueur Noir : ")
+
+       #création joueur
+       self._players.append(Player(nom1, 0))
+       self._players.append(Player(nom2, 1))
+
+       #blancs commencent
+       self._currentPlayer = self._players[0]
+
+   def displayBoard(self):
+       print("\n   a  b  c  d  e  f  g  h")
+       print("  -------------------------")
+
+       # affichage a partir de ligne huite
+       for ligne_num in range(8, 0, -1):
+           ligne_texte = f"{ligne_num} |"
+
+           for col_lettre in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+               pos_case = Position(col_lettre, ligne_num)
+               piece = self._board.getPiece(pos_case)
+
+               if piece is not None:
+                   ligne_texte += f" {str(piece)} "
+               else:
+                   ligne_texte += " . "
+
+           print(ligne_texte + f"| {ligne_num}")
+
+       print("  -------------------------")
+       print("   a  b  c  d  e  f  g  h\n")
+
+   def isValidMove(self, move):
+       #verifier réponse position
+       if len(move) != 4:
+           print("Erreur : Le coup doit faire exactement 4 caractères.")
+           return False
+
+       colonnes_valides = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+       lignes_valides = ['1', '2', '3', '4', '5', '6', '7', '8']
+
+       #verifier l
+       if move[0] not in colonnes_valides or move[2] not in colonnes_valides:
+           print("Erreur : Colonne invalide (utilisez de 'a' à 'h').")
+           return False
+
+       if move[1] not in lignes_valides or move[3] not in lignes_valides:
+           print("Erreur : Ligne invalide (utilisez de '1' à '8').")
+           return False
+
+       return True
+
+   def isCheckMate(self):
+       return False
+
+   def updateBoard(self, move):
+       #coordonée depart arrivé
+       c_dep = move[0]
+       l_dep = int(move[1])
+       c_arr = move[2]
+       l_arr = int(move[3])
+
+       pos_dep = Position(c_dep, l_dep)
+       pos_arr = Position(c_arr, l_arr)
+
+       piece_selectionnee = self._board.getPiece(pos_dep)
+
+       if piece_selectionnee is not None:
+           #si piece sur case d'arriver, capture
+           piece_cible = self._board.getPiece(pos_arr)
+           if piece_cible is not None:
+               print(f"-> Capture de la pièce : {piece_cible}")
+               self._board.enleverPiece(piece_cible)
+
+           #déplacement piece
+           piece_selectionnee.position = pos_arr
+       else:
+           print("Erreur : Case vide. Aucune pièce à déplacer.")
+
+   def switchPlayer(self):
+       #changement tour
+       if self._currentPlayer == self._players[0]:
+           self._currentPlayer = self._players[1]
+       else:
+           self._currentPlayer = self._players[0]
+
+   def play(self):
+       self.initPlayer()
+
+       while not self.isCheckMate():
+           self.displayBoard()
+
+           coup = ""
+           #boucle si entrée incorrecte
+           while not self.isValidMove(coup):
+               coup = self._currentPlayer.askMove()
+
+           self.updateBoard(coup)
+           self.switchPlayer()
+
+
+#lancer jeu
+if __name__ == "__main__":
+   jeu = Chess()
+   jeu.play()
